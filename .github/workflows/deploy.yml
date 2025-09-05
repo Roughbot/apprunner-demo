@@ -78,6 +78,7 @@ jobs:
             "AutoDeploymentsEnabled": true
           }
           JSON
+          )
           if [ "$SVC_ARN" = "None" ] || [ -z "$SVC_ARN" ]; then
             aws apprunner create-service \
               --service-name "${SERVICE_NAME}" \
