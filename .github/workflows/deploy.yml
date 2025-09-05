@@ -9,7 +9,7 @@ env:
   AWS_ACCOUNT_ID: 604100153348
   ECR_REPOSITORY: simple-server
   SERVICE_NAME: simple-server
-  IMAGE_TAG: ${{ github.sha }}
+  IMAGE_TAG: latest
 
 permissions:
   id-token: write
