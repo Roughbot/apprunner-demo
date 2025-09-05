@@ -1,10 +1,22 @@
 const express = require("express");
+const path = require("path");
+const fs = require("fs");
 require("dotenv").config();
 const app = express();
 const port = process.env.PORT ? Number(process.env.PORT) : 3000;
 
-app.get("/healthz", (req, res) => {
-  res.type("text/plain").send("ok");
+app.get("/sathya", (req, res) => {
+  const imagePath = path.join(__dirname, "public", "sathya.jpg");
+  fs.access(imagePath, fs.constants.R_OK, (err) => {
+    if (err) {
+      return res.status(404).type("text/plain").send("Image not found");
+    }
+    res.sendFile(imagePath, (sendErr) => {
+      if (sendErr) {
+        res.status(500).type("text/plain").send("Failed to send image");
+      }
+    });
+  });
 });
 
 app.get("/", (req, res) => {
