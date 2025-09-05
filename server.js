@@ -19,6 +19,10 @@ app.get("/sathya", (req, res) => {
   });
 });
 
+app.get("/healthz", (req, res) => {
+  res.type("text/plain").send("ok");
+});
+
 app.get("/", (req, res) => {
   res.json({
     name: "apprunner-demo",
