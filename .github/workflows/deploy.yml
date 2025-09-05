@@ -42,7 +42,7 @@ jobs:
 
       - name: Tag image for ECR
         run: |
-          echo "ECR_URI=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}" >> $GITHUB_ENV
+          ECR_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}"; echo "ECR_URI=${ECR_URI}" >> $GITHUB_ENV
           docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_URI:$IMAGE_TAG
           docker tag $ECR_REPOSITORY:latest $ECR_URI:latest
 
