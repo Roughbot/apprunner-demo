@@ -1,0 +1,96 @@
+name: Build & Deploy to App Runner (ECR)
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+env:
+  AWS_REGION: us-west-2
+  AWS_ACCOUNT_ID: 604100153348
+  ECR_REPOSITORY: simple-server
+  SERVICE_NAME: simple-server
+  IMAGE_TAG: ${{ github.sha }}
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/GithubActionsAppRunnerDeployRole
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # Ensure ECR repo exists (add this step before build/push)
+      - name: Ensure ECR repository exists
+        run: |
+          aws ecr describe-repositories --repository-names "$ECR_REPOSITORY" >/dev/null 2>&1 || \
+          aws ecr create-repository --repository-name "$ECR_REPOSITORY" --image-scanning-configuration scanOnPush=true
+
+      - name: Build Docker image
+        run: |
+          docker build -t $ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REPOSITORY:latest .
+
+      - name: Tag image for ECR
+        run: |
+          echo "ECR_URI=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}" >> $GITHUB_ENV
+          docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_URI:$IMAGE_TAG
+          docker tag $ECR_REPOSITORY:latest $ECR_URI:latest
+
+      - name: Push image to ECR
+        run: |
+          docker push $ECR_URI:$IMAGE_TAG
+          docker push $ECR_URI:latest
+
+      - name: Create or update App Runner service
+        shell: bash
+        run: |
+          set -euo pipefail
+          ECR_ACCESS_ROLE_ARN="arn:aws:iam::${AWS_ACCOUNT_ID}:role/AppRunnerECRAccessRole"
+          IMAGE_ID="${ECR_URI}:${IMAGE_TAG}"
+
+          SVC_ARN=$(aws apprunner list-services \
+            --query "ServiceSummaryList[?ServiceName=='${SERVICE_NAME}'].ServiceArn | [0]" \
+            --output text)
+
+          SRC_CFG=$(cat <<JSON
+          {
+            "ImageRepository": {
+              "ImageIdentifier": "${IMAGE_ID}",
+              "ImageRepositoryType": "ECR",
+              "ImageConfiguration": {
+                "Port": "9090",
+                "RuntimeEnvironmentVariables": [
+                  {"Name":"APP_ENV","Value":"prod"}
+                ]
+              }
+            },
+            "AuthenticationConfiguration": { "AccessRoleArn": "${ECR_ACCESS_ROLE_ARN}" },
+            "AutoDeploymentsEnabled": true
+          }
+          JSON
+          if [ "$SVC_ARN" = "None" ] || [ -z "$SVC_ARN" ]; then
+            aws apprunner create-service \
+              --service-name "${SERVICE_NAME}" \
+              --source-configuration "${SRC_CFG}" \
+              --health-check-configuration "Protocol=HTTP,Path=/healthz,Interval=10,Timeout=5,HealthyThreshold=1,UnhealthyThreshold=3"
+          else
+            aws apprunner update-service \
+              --service-arn "${SVC_ARN}" \
+              --source-configuration "${SRC_CFG}"
+          fi
+
+      - name: Show Service URL
+        run: |
+          aws apprunner list-services \
+            --query "ServiceSummaryList[?ServiceName=='${SERVICE_NAME}'].ServiceUrl | [0]" \
+            --output text
