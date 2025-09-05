@@ -5,6 +5,12 @@ require("dotenv").config();
 const app = express();
 const port = process.env.PORT ? Number(process.env.PORT) : 3000;
 
+app.get("/testing", (req, res) => {
+  res.json({
+    message: "Testing endpoint",
+  });
+});
+
 app.get("/sathya", (req, res) => {
   const imagePath = path.join(__dirname, "public", "sathya.jpg");
   fs.access(imagePath, fs.constants.R_OK, (err) => {
