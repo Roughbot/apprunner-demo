@@ -5,9 +5,9 @@ require("dotenv").config();
 const app = express();
 const port = process.env.PORT ? Number(process.env.PORT) : 3000;
 
-app.get("/testing", (req, res) => {
+app.get("/auto-deploy", (req, res) => {
   res.json({
-    message: "Testing endpoint",
+    message: "Auto deploy endpoint",
   });
 });
 
