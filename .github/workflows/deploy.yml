@@ -52,7 +52,6 @@ jobs:
           docker push $ECR_URI:latest
 
       - name: Create or update App Runner service
-        id: deploy
         shell: bash
         run: |
           set -euo pipefail
@@ -70,9 +69,9 @@ jobs:
               "ImageRepositoryType": "ECR",
               "ImageConfiguration": {
                 "Port": "9090",
-                "RuntimeEnvironmentVariables": {
-                  "APP_ENV": "PRODUCTION",
-                  "PORT": "9090"
+               "RuntimeEnvironmentVariables": {
+                "APP_ENV": "PRODUCTION",
+                "PORT": "9090"
                 }
               }
             },
@@ -81,26 +80,19 @@ jobs:
           }
           JSON
           )
-
           if [ "$SVC_ARN" = "None" ] || [ -z "$SVC_ARN" ]; then
-            echo "Creating new App Runner service..."
-            SVC_ARN=$(aws apprunner create-service \
+            aws apprunner create-service \
               --service-name "${SERVICE_NAME}" \
               --source-configuration "${SRC_CFG}" \
-              --health-check-configuration "Protocol=HTTP,Path=/healthz,Interval=10,Timeout=5,HealthyThreshold=1,UnhealthyThreshold=3" \
-              --query 'Service.ServiceArn' \
-              --output text)
+              --health-check-configuration "Protocol=HTTP,Path=/healthz,Interval=10,Timeout=5,HealthyThreshold=1,UnhealthyThreshold=3"
           else
-            echo "Updating existing App Runner service..."
             aws apprunner update-service \
               --service-arn "${SVC_ARN}" \
               --source-configuration "${SRC_CFG}"
           fi
 
-          echo "SVC_ARN=$SVC_ARN" >> $GITHUB_ENV
-
-      - name: Wait for App Runner deployment to complete
+      - name: Show Service URL
         run: |
-          echo "Waiting for App Runner service ($SVC_ARN) to become stable..."
-          aws apprunner wait service-stable --service-arn $SVC_ARN
-          echo "App Runner deployment is complete"
+          aws apprunner list-services \
+            --query "ServiceSummaryList[?ServiceName=='${SERVICE_NAME}'].ServiceUrl | [0]" \
+            --output text
