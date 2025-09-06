@@ -90,6 +90,13 @@ jobs:
               --service-arn "${SVC_ARN}" \
               --source-configuration "${SRC_CFG}"
           fi
+      - name: Wait for service to be ready
+        run: |
+          SVC_URL=$(aws apprunner list-services \
+            --region $AWS_REGION \
+            --query "ServiceSummaryList[?ServiceName=='${SERVICE_NAME}'].ServiceUrl | [0]" \
+            --output text)
+          aws apprunner wait service-stable --region $AWS_REGION --service-arn "${SVC_ARN}"
 
       - name: Show Service URL
         run: |
