@@ -70,8 +70,8 @@ jobs:
               "ImageConfiguration": {
                 "Port": "9090",
                "RuntimeEnvironmentVariables": [
-                  {"Name":"APP_ENV"},
-                  {"Name":"PORT"}
+                {"APP_ENV": "PRODUCTION"},
+                {"PORT": "9090"}
                 ]
               }
             },
