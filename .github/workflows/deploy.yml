@@ -69,10 +69,10 @@ jobs:
               "ImageRepositoryType": "ECR",
               "ImageConfiguration": {
                 "Port": "9090",
-               "RuntimeEnvironmentVariables": [
-                {"APP_ENV": "PRODUCTION"},
-                {"PORT": "9090"}
-                ]
+               "RuntimeEnvironmentVariables": {
+                "APP_ENV": "PRODUCTION",
+                "PORT": "9090"
+                }
               }
             },
             "AuthenticationConfiguration": { "AccessRoleArn": "${ECR_ACCESS_ROLE_ARN}" },
