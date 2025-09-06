@@ -7,7 +7,7 @@ const port = process.env.PORT ? Number(process.env.PORT) : 3000;
 
 app.get("/auto-deploy", (req, res) => {
   res.json({
-    message: "Auto deploy endpoint",
+    message: "Auto deploy endpoint success",
   });
 });
 
