@@ -51,56 +51,61 @@ jobs:
           docker push $ECR_URI:$IMAGE_TAG
           docker push $ECR_URI:latest
 
-          - name: Create or update App Runner service
-          shell: bash
-          run: |
-            set -euo pipefail
+      - name: Create or update App Runner service
+        shell: bash
+        run: |
+          set -euo pipefail
+          ECR_ACCESS_ROLE_ARN="arn:aws:iam::${AWS_ACCOUNT_ID}:role/AppRunnerECRAccessRole"
+          INSTANCE_ROLE_ARN="arn:aws:iam::${AWS_ACCOUNT_ID}:role/AppRunnerInstanceRole"
+          IMAGE_ID="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${IMAGE_TAG}"
+          SECRET_ARN="arn:aws:secretsmanager:${AWS_REGION}:${AWS_ACCOUNT_ID}:secret:apprunner-demo-secrets-9E9ilc-*"
 
-            ECR_ACCESS_ROLE_ARN="arn:aws:iam::${AWS_ACCOUNT_ID}:role/AppRunnerECRAccessRole"
-            INSTANCE_ROLE_ARN="arn:aws:iam::${AWS_ACCOUNT_ID}:role/AppRunnerInstanceRole"
-            IMAGE_ID="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${IMAGE_TAG}"
-            SECRET_ARN="arn:aws:secretsmanager:${AWS_REGION}:${AWS_ACCOUNT_ID}:secret:apprunner-demo-secrets-9E9ilc-*"
+          SVC_ARN=$(aws apprunner list-services \
+            --query "ServiceSummaryList[?ServiceName=='${SERVICE_NAME}'].ServiceArn | [0]" \
+            --output text)
 
-            SVC_ARN=$(aws apprunner list-services \
-              --query "ServiceSummaryList[?ServiceName=='${SERVICE_NAME}'].ServiceArn | [0]" \
-              --output text)
+          echo "Preparing to deploy image: $IMAGE_ID"
+          echo "Using secret ARN: $SECRET_ARN"
 
-            echo "Preparing to deploy image: $IMAGE_ID"
-            echo "Using secret ARN: $SECRET_ARN"
-
-            SRC_CFG=$(jq -n \
-              --arg image_id "$IMAGE_ID" \
-              --arg access_role "$ECR_ACCESS_ROLE_ARN" \
-              --arg secret_arn "$SECRET_ARN" \
-              '{
-                ImageRepository: {
-                  ImageIdentifier: $image_id,
-                  ImageRepositoryType: "ECR",
-                  ImageConfiguration: {
-                    Port: "9090",
-                    RuntimeEnvironmentSecrets: {
-                      APP_ENV: $secret_arn,
-                      PORT: $secret_arn
-                    }
+          SRC_CFG=$(jq -n \
+            --arg image_id "$IMAGE_ID" \
+            --arg access_role "$ECR_ACCESS_ROLE_ARN" \
+            --arg secret_arn "$SECRET_ARN" \
+            '{
+              ImageRepository: {
+                ImageIdentifier: $image_id,
+                ImageRepositoryType: "ECR",
+                ImageConfiguration: {
+                  Port: "9090",
+                  RuntimeEnvironmentSecrets: {
+                    APP_ENV: $secret_arn,
+                    PORT: $secret_arn
                   }
-                },
-                AuthenticationConfiguration: {
-                  AccessRoleArn: $access_role
-                },
-                AutoDeploymentsEnabled: true
-              }')
+                }
+              },
+              AuthenticationConfiguration: {
+                AccessRoleArn: $access_role
+              },
+              AutoDeploymentsEnabled: true
+            }')
 
-            if [ "$SVC_ARN" = "None" ] || [ -z "$SVC_ARN" ]; then
-              echo "Creating new App Runner service..."
-              aws apprunner create-service \
-                --service-name "${SERVICE_NAME}" \
-                --source-configuration "$SRC_CFG" \
-                --instance-configuration "InstanceRoleArn=${INSTANCE_ROLE_ARN}" \
-                --health-check-configuration "Protocol=HTTP,Path=/healthz,Interval=10,Timeout=5,HealthyThreshold=1,UnhealthyThreshold=3"
-            else
-              echo "Updating existing App Runner service: $SVC_ARN"
-              aws apprunner update-service \
-                --service-arn "$SVC_ARN" \
-                --source-configuration "$SRC_CFG" \
-                --instance-configuration "InstanceRoleArn=${INSTANCE_ROLE_ARN}"
-            fi
+          if [ "$SVC_ARN" = "None" ] || [ -z "$SVC_ARN" ]; then
+            echo "Creating new App Runner service..."
+            aws apprunner create-service \
+              --service-name "${SERVICE_NAME}" \
+              --source-configuration "$SRC_CFG" \
+              --instance-configuration "InstanceRoleArn=${INSTANCE_ROLE_ARN}" \
+              --health-check-configuration "Protocol=HTTP,Path=/healthz,Interval=10,Timeout=5,HealthyThreshold=1,UnhealthyThreshold=3"
+          else
+            echo "Updating existing App Runner service: $SVC_ARN"
+            aws apprunner update-service \
+              --service-arn "$SVC_ARN" \
+              --source-configuration "$SRC_CFG" \
+              --instance-configuration "InstanceRoleArn=${INSTANCE_ROLE_ARN}"
+          fi
+
+      - name: Show Service URL
+        run: |
+          aws apprunner list-services \
+            --query "ServiceSummaryList[?ServiceName=='${SERVICE_NAME}'].ServiceUrl | [0]" \
+            --output text
