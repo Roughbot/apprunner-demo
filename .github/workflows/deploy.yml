@@ -70,7 +70,7 @@ jobs:
           SRC_CFG=$(jq -n \
             --arg image_id "$IMAGE_ID" \
             --arg access_role "$ECR_ACCESS_ROLE_ARN" \
-            --arg secret_arn "$SECRET_ARN.APP_ENV" \
+            --arg secret_arn "$SECRET_ARN:APP_ENV::" \
             '{
               ImageRepository: {
                 ImageIdentifier: $image_id,
