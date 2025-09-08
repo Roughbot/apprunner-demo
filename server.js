@@ -49,6 +49,7 @@ app.get("/", (req, res) => {
   });
 });
 
+// get secret key from secret manager using aws sdk
 getSecretKey()
   .then((secretKey) => {
     console.log("secret key from secret manager:", secretKey);
