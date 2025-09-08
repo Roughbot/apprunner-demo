@@ -56,6 +56,7 @@ jobs:
         run: |
           set -euo pipefail
           ECR_ACCESS_ROLE_ARN="arn:aws:iam::${AWS_ACCOUNT_ID}:role/AppRunnerECRAccessRole"
+          INSTANCE_ROLE_ARN="arn:aws:iam::${AWS_ACCOUNT_ID}:role/AppRunnerInstanceRole"
           IMAGE_ID="${ECR_URI}:${IMAGE_TAG}"
 
           SVC_ARN=$(aws apprunner list-services \
@@ -72,7 +73,7 @@ jobs:
                "RuntimeEnvironmentSecrets": [
                 {
                   "Name": "APP_ENV",
-                  "Value": "arn:aws:secretsmanager:${AWS_REGION}:${AWS_ACCOUNT_ID}:secret:apprunner-demo-secrets-9E9ilc:APP_ENV::",
+                  "Value": "arn:aws:secretsmanager:${AWS_REGION}:${AWS_ACCOUNT_ID}:secret:apprunner-demo-secrets-9E9ilc:APP_ENV::"
                 },
                 {
                   "Name": "PORT",
@@ -80,7 +81,7 @@ jobs:
                 }
                 ]
               }
-            }
+            },
             "AuthenticationConfiguration": { "AccessRoleArn": "${ECR_ACCESS_ROLE_ARN}" },
             "AutoDeploymentsEnabled": true
           }
@@ -90,11 +91,13 @@ jobs:
             aws apprunner create-service \
               --service-name "${SERVICE_NAME}" \
               --source-configuration "${SRC_CFG}" \
+              --instance-configuration "InstanceRoleArn=${INSTANCE_ROLE_ARN}" \
               --health-check-configuration "Protocol=HTTP,Path=/healthz,Interval=10,Timeout=5,HealthyThreshold=1,UnhealthyThreshold=3"
           else
             aws apprunner update-service \
               --service-arn "${SVC_ARN}" \
-              --source-configuration "${SRC_CFG}"
+              --source-configuration "${SRC_CFG}" \
+              --instance-configuration "InstanceRoleArn=${INSTANCE_ROLE_ARN}"
           fi
 
       - name: Show Service URL
