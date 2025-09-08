@@ -58,7 +58,7 @@ jobs:
           ECR_ACCESS_ROLE_ARN="arn:aws:iam::${AWS_ACCOUNT_ID}:role/AppRunnerECRAccessRole"
           INSTANCE_ROLE_ARN="arn:aws:iam::${AWS_ACCOUNT_ID}:role/AppRunnerInstanceRole"
           IMAGE_ID="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${IMAGE_TAG}"
-          SECRET_ARN="arn:aws:secretsmanager:${AWS_REGION}:${AWS_ACCOUNT_ID}:secret:apprunner-demo-secrets-9E9ilc:SecretString:APP_ENV"
+          SECRET_ARN="arn:aws:secretsmanager:${AWS_REGION}:${AWS_ACCOUNT_ID}:secret:apprunner-demo-secrets-9E9ilc:SecretString"
 
           SVC_ARN=$(aws apprunner list-services \
             --query "ServiceSummaryList[?ServiceName=='${SERVICE_NAME}'].ServiceArn | [0]" \
@@ -70,7 +70,7 @@ jobs:
           SRC_CFG=$(jq -n \
             --arg image_id "$IMAGE_ID" \
             --arg access_role "$ECR_ACCESS_ROLE_ARN" \
-            --arg secret_arn "$SECRET_ARN" \
+            --arg secret_arn "$SECRET_ARN:SecretString:APP_ENV" \
             '{
               ImageRepository: {
                 ImageIdentifier: $image_id,
@@ -78,10 +78,10 @@ jobs:
                 ImageConfiguration: {
                   Port: "9090",
                   RuntimeEnvironmentVariables: {
-                    PORT: "9090"
+                    "PORT": "9090"
                   },
                     RuntimeEnvironmentSecrets: {
-                      APP_ENV: $secret_arn,
+                      "APP_ENV": $secret_arn,
                   }
                 }
               },
