@@ -37,5 +37,6 @@ app.get("/", (req, res) => {
 });
 
 app.listen(port, "0.0.0.0", () => {
+  console.log("secret key from secret manager", process.env.APP_ENV);
   console.log(`Server listening on http://0.0.0.0:${port}`);
 });
