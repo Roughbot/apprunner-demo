@@ -11,7 +11,7 @@ const client = new AWS.SecretsManager({ region: process.env.AWS_REGION });
 async function getSecretKey() {
   const secretKey = await client.send(
     new AWS.GetSecretValueCommand({
-      SecretId: process.env.SECRET_ARN,
+      SecretId: process.env.SECRET_NAME,
     })
   );
   console.log(

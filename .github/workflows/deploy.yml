@@ -77,7 +77,7 @@ jobs:
                   RuntimeEnvironmentVariables: {
                     "PORT": "9090",
                     "REGION": "us-west-2",
-                    "SECRET_ARN": "arn:aws:secretsmanager:${AWS_REGION}:${AWS_ACCOUNT_ID}:secret:apprunner-demo-secrets-9E9ilc"
+                    "SECRET_NAME": "apprunner-demo-secrets"
                   },
                 }
               },
