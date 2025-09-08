@@ -3,7 +3,7 @@ const path = require("path");
 const fs = require("fs");
 require("dotenv").config();
 const app = express();
-const port = process.env.PORT ? Number(process.env.PORT) : 3000;
+const port = process.env.PORT ? Number(process.env.PORT) : 9090;
 
 app.get("/auto-deploy", (req, res) => {
   res.json({
