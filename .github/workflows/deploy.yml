@@ -75,8 +75,8 @@ jobs:
                 ImageConfiguration: {
                   Port: "9090",
                   RuntimeEnvironmentVariables: {
-                    "PORT": "9090"
-                    "REGION": "us-west-2"
+                    "PORT": "9090",
+                    "REGION": "us-west-2",
                     "SECRET_ARN": "arn:aws:secretsmanager:${AWS_REGION}:${AWS_ACCOUNT_ID}:secret:apprunner-demo-secrets-9E9ilc"
                   },
                 }
