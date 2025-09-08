@@ -64,7 +64,6 @@ jobs:
             --output text)
 
           echo "Preparing to deploy image: $IMAGE_ID"
-          echo "Using secret ARN: $SECRET_ARN"
 
           SRC_CFG=$(jq -n \
             --arg image_id "$IMAGE_ID" \
