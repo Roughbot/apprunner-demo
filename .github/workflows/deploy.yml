@@ -69,16 +69,16 @@ jobs:
               "ImageRepositoryType": "ECR",
               "ImageConfiguration": {
                 "Port": "9090",
-               "RuntimeEnvironmentVariables": [
+               "RuntimeEnvironmentVariables": 
                 {
                   "Name": "APP_ENV",
-                  "Value": "arn:aws:secretsmanager:${AWS_REGION}:${AWS_ACCOUNT_ID}:secret:apprunner-demo-secrets-9E9ilc:APP_ENV::"
-                },
-                {
+                  "Value": "arn:aws:secretsmanager:${AWS_REGION}:${AWS_ACCOUNT_ID}:secret:apprunner-demo-secrets-9E9ilc:APP_ENV::",
+
                   "Name": "PORT",
                   "Value": "arn:aws:secretsmanager:${AWS_REGION}:${AWS_ACCOUNT_ID}:secret:apprunner-demo-secrets-9E9ilc:PORT::"
                 }
-                ]
+                
+                
               }
             },
             "AuthenticationConfiguration": { "AccessRoleArn": "${ECR_ACCESS_ROLE_ARN}" },
