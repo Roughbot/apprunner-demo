@@ -82,7 +82,6 @@ jobs:
                   },
                     RuntimeEnvironmentSecrets: {
                       APP_ENV: $secret_arn,
-                      PORT: $secret_arn
                   }
                 }
               },
