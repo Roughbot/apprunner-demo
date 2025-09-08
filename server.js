@@ -56,6 +56,8 @@ getSecretKey()
   .finally(() => {
     app.listen(port, "0.0.0.0", () => {
       console.log("secret key from secret manager:", KeyFromSecretManager);
-      console.log(`Server listening on http://0.0.0.0:${port}`);
+      console.log(
+        `Server listening on http://0.0.0.0:${port} with env: ${KeyFromSecretManager}`
+      );
     });
   });
