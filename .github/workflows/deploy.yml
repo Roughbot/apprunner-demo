@@ -77,9 +77,11 @@ jobs:
                 ImageRepositoryType: "ECR",
                 ImageConfiguration: {
                   Port: "9090",
+                  RuntimeEnvironmentVariables: {
+                    PORT: "9090"
+                  },
                   RuntimeEnvironmentSecrets: {
                     APP_ENV: $secret_arn,
-                    PORT: $secret_arn
                   }
                 }
               },
