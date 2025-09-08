@@ -4,7 +4,7 @@ const fs = require("fs");
 require("dotenv").config();
 const app = express();
 const port = process.env.PORT ? Number(process.env.PORT) : 9090;
-
+const secretKey = process.env.APP_ENV ? process.env.APP_ENV : "development";
 app.get("/auto-deploy", (req, res) => {
   res.json({
     message: "Auto deploy endpoint successful",
@@ -32,11 +32,11 @@ app.get("/healthz", (req, res) => {
 app.get("/", (req, res) => {
   res.json({
     name: "apprunner-demo",
-    env: process.env.APP_ENV || "development",
+    env: secretKey,
   });
 });
 
 app.listen(port, "0.0.0.0", () => {
-  console.log("secret key from secret manager", process.env.APP_ENV);
+  console.log("secret key from secret manager", secretKey);
   console.log(`Server listening on http://0.0.0.0:${port}`);
 });
