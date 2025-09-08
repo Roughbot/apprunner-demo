@@ -7,17 +7,14 @@ const app = express();
 const port = process.env.PORT ? Number(process.env.PORT) : 9090;
 
 const client = new AWS.SecretsManager({ region: process.env.AWS_REGION });
-
+let KeyFromSecretManager = null;
 async function getSecretKey() {
   const secretKey = await client.send(
     new AWS.GetSecretValueCommand({
       SecretId: process.env.SECRET_NAME,
     })
   );
-  console.log(
-    "secret key from secret manager:",
-    JSON.parse(secretKey.SecretString).APP_ENV
-  );
+  KeyFromSecretManager = JSON.parse(secretKey.SecretString).APP_ENV;
   return JSON.parse(secretKey.SecretString).APP_ENV;
 }
 
@@ -56,11 +53,9 @@ getSecretKey()
   .then((secretKey) => {
     console.log("secret key from secret manager:", secretKey);
   })
-  .catch((err) => {
-    console.error("Error getting secret key:", err);
-  })
   .finally(() => {
     app.listen(port, "0.0.0.0", () => {
+      console.log("secret key from secret manager:", KeyFromSecretManager);
       console.log(`Server listening on http://0.0.0.0:${port}`);
     });
   });
