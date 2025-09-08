@@ -12,6 +12,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.883.0",
     "dotenv": "^17.2.2",
     "express": "^5.1.0"
   }

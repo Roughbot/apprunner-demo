@@ -2,9 +2,25 @@ const express = require("express");
 const path = require("path");
 const fs = require("fs");
 require("dotenv").config();
+const AWS = require("@aws-sdk/client-secrets-manager");
 const app = express();
 const port = process.env.PORT ? Number(process.env.PORT) : 9090;
-const secretKey = process.env.APP_ENV ? process.env.APP_ENV : "development";
+
+const client = new AWS.SecretsManager({ region: process.env.AWS_REGION });
+
+async function getSecretKey() {
+  const secretKey = await client.send(
+    new AWS.GetSecretValueCommand({
+      SecretId: process.env.SECRET_ARN,
+    })
+  );
+  console.log(
+    "secret key from secret manager:",
+    JSON.parse(secretKey.SecretString).APP_ENV
+  );
+  return JSON.parse(secretKey.SecretString).APP_ENV;
+}
+
 app.get("/auto-deploy", (req, res) => {
   res.json({
     message: "Auto deploy endpoint successful",
@@ -32,11 +48,19 @@ app.get("/healthz", (req, res) => {
 app.get("/", (req, res) => {
   res.json({
     name: "apprunner-demo",
-    env: secretKey,
+    env: process.env.APP_ENV || "development",
   });
 });
 
-app.listen(port, "0.0.0.0", () => {
-  console.log("secret key from secret manager", secretKey);
-  console.log(`Server listening on http://0.0.0.0:${port}`);
-});
+getSecretKey()
+  .then((secretKey) => {
+    console.log("secret key from secret manager:", secretKey);
+  })
+  .catch((err) => {
+    console.error("Error getting secret key:", err);
+  })
+  .finally(() => {
+    app.listen(port, "0.0.0.0", () => {
+      console.log(`Server listening on http://0.0.0.0:${port}`);
+    });
+  });
