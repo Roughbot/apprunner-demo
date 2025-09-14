@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>S3 File Upload & Manager</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+    <script src="/static/script.js" defer></script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🚀 S3 File Manager</h1>
+        <p>Upload, manage, and view your files in Amazon S3</p>
+      </div>
+
+      <div class="main-content">
+        <!-- Upload Section -->
+        <div class="upload-section">
+          <h3>📁 Upload Files to S3</h3>
+          <form class="upload-form" id="uploadForm">
+            <div class="file-input-wrapper">
+              <input
+                type="file"
+                id="fileInput"
+                class="file-input"
+                multiple
+                accept="image/*,.svg,.pdf,.txt,.doc,.docx"
+              />
+              <label
+                for="fileInput"
+                class="file-input-label"
+                id="fileInputLabel"
+              >
+                📎 Click to select files or drag and drop
+                <br />
+                <small
+                  >Supports: Images (including SVG), PDF, TXT, DOC, DOCX (Max
+                  10MB each)</small
+                >
+              </label>
+            </div>
+            <button type="submit" class="upload-btn" id="uploadBtn" disabled>
+              🚀 Upload Files
+            </button>
+          </form>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div class="loading" id="loading">
+          <div class="spinner"></div>
+          <p>Processing your request...</p>
+        </div>
+
+        <!-- Files Section -->
+        <div class="files-section">
+          <h3 class="section-title">📂 Your Files</h3>
+          <div id="filesGrid" class="files-grid">
+            <div class="empty-state">
+              <div>📁</div>
+              <h3>No files uploaded yet</h3>
+              <p>Upload some files to get started!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

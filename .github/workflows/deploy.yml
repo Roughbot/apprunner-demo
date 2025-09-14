@@ -77,7 +77,8 @@ jobs:
                   RuntimeEnvironmentVariables: {
                     "PORT": "9090",
                     "REGION": "us-west-2",
-                    "SECRET_NAME": "apprunner-demo-secrets"
+                    "SECRET_NAME": "apprunner-demo-secrets",
+                    "S3_BUCKET_NAME": "mys3bucketsathya"
                   },
                 }
               },
