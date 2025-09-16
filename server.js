@@ -46,7 +46,7 @@ app.get("/healthz", (req, res) => {
 app.get("/", (req, res) => {
   res.json({
     name: "apprunner-demo",
-    env: process.env.APP_ENV || "development",
+    env: KeyFromSecretManager || "development",
   });
 });
 
