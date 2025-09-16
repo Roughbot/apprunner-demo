@@ -9,8 +9,8 @@ env:
   AWS_REGION: us-west-2
   AWS_ACCOUNT_ID: 604100153348
   ECR_REPOSITORY: simple-server
-  CLUSTER_NAME: simple-server-cluster
-  SERVICE_NAME: simple-server-service
+  CLUSTER_NAME: sathya-demo-server
+  SERVICE_NAME: sathya-simple-server-service-wgzxr5e0
   CONTAINER_NAME: simple-server
   IMAGE_TAG: ${{ github.event.inputs.image_tag || github.sha }}
 
